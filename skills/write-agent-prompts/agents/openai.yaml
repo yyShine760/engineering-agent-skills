@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Agent Prompts"
+  short_description: "Draft concise, complete prompts for other AI agents"
+  default_prompt: "Use $write-agent-prompts to draft a concise, complete prompt for another AI agent."

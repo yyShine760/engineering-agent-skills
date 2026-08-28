@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workflow Onboarding"
+  short_description: "Interactively survey and establish AI-agent collaboration setup"
+  default_prompt: "Use $agent-workflow-onboarding to survey the workspace and propose a collaboration setup."

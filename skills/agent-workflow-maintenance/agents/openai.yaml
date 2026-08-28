@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workflow Maintenance"
+  short_description: "Conservatively maintain established AI-agent workflow and rules"
+  default_prompt: "Use $agent-workflow-maintenance to check and update project agent workflow."
