@@ -1,31 +1,34 @@
 # Engineering Agent Skills
 
-A curated collection of production-grade **Engineering Agent Skills** built on the **Lean Knowledge Architecture (v2.0.0)**. Designed for multi-agent collaboration, project onboarding, workflow governance, and concise task delegation across modern AI coding agents (OpenCode, Codex, Claude Code, Gemini CLI, Cursor, and more).
+A curated collection of production-grade **Engineering Agent Skills** built on the **Lean Knowledge Architecture (v2.0.1)**. Designed for multi-agent collaboration, project onboarding, workflow governance, and concise task delegation across modern AI coding agents (OpenCode, Codex, Claude Code, Gemini CLI, Cursor, and more).
 
 ---
 
-## 💡 Architecture & Philosophy (v2.0.0)
+## 💡 Architecture & Philosophy (v2.0.1)
 
 Traditional agent setups often suffer from file proliferation (8~20 fragmented documentation files), causing high cognitive overhead and cross-file synchronization drift. 
 
-**Engineering Agent Skills v2.0.0** shifts from *file-oriented fragmentation* to a **Source-of-Truth-Oriented Lean Architecture**:
+**Engineering Agent Skills v2.0.1** shifts from *file-oriented fragmentation* to a **Source-of-Truth-Oriented Lean Architecture**:
 
 ```text
 Project/
-├── AGENTS.md             # Rulebook: agent behavioral rules, constraints & Knowledge Map
+├── AGENTS.md             # Rulebook: agent behavioral rules, constraints, verification mandate & Knowledge Map
 ├── Docs/
-│   ├── PROJECT.md        # Single consolidated technical truth: Architecture, Components, Hardware, Protocols, OTA, etc.
+│   ├── PROJECT.md        # Single consolidated technical facts: Architecture, Build & Verification, Hardware, Protocols, OTA, etc.
 │   └── DECISIONS.md      # (Optional) Architectural decisions and trade-off rationale
 └── TASKS.md              # (Optional) Active task queue and progress tracker
 ```
 
 ### Core Principles
 
-1. **Source-of-Truth-Oriented (3+1 Core Files):** Every domain fact has exactly one authoritative owner. No scattered documentation.
-2. **Promote-on-Pressure (Grow, Then Split):** Avoid premature modularization. Start with sections in `Docs/PROJECT.md`, and only split into dedicated docs (e.g. `Docs/OTA.md`) when a section grows large (>300 lines) or has distinct ownership.
-3. **Zero Derived State Duplication:** Abolish redundant status files (e.g. `status.md`). Task progress is maintained strictly within `TASKS.md`.
-4. **Trigger-Driven Maintenance:** Maintenance flows directly from a concrete change trigger through the `AGENTS.md` Knowledge Map to the single target file/section, eliminating expensive full-workspace scans.
-5. **Thin Platform Adapters:** `CLAUDE.md`, `GEMINI.md`, and `.cursorrules` act strictly as thin pointers to `./AGENTS.md` and `Docs/PROJECT.md` without duplicating project knowledge.
+1. **Explicit Division of Responsibility:**
+   - **`AGENTS.md` (Behavior & Rules):** Mandates *that* verification must occur after changes, sets permissions/prohibitions, and provides the dynamic **Project Knowledge Map**.
+   - **`Docs/PROJECT.md` (Facts & Execution):** The single source of truth specifying *how* to build, run, test, and verify (`## Build & Verification`), plus architecture, hardware, protocols, OTA, and debugging notes.
+2. **Promote-on-Pressure (Grow, Then Split):** Avoid premature modularization (KISS / YAGNI). Start within `Docs/PROJECT.md`. Split into dedicated documents (e.g. `Docs/OTA.md`) only when qualitative pressure arises (navigational difficulty, independent ownership, distinct update cadence, or large size).
+3. **Dynamic Knowledge Map (Zero Ghost Links):** `AGENTS.md` includes only rows for artifacts that actually exist in the project, keeping navigation clean and deterministic.
+4. **Zero Derived State Duplication:** Abolish redundant status files (e.g. `status.md`). Task progress is maintained strictly within `TASKS.md`.
+5. **Trigger-Driven Maintenance:** Maintenance flows directly from a concrete change trigger through the `AGENTS.md` Knowledge Map to the single target file/section, eliminating expensive full-workspace scans.
+6. **On-Demand Thin Adapters:** `CLAUDE.md`, `GEMINI.md`, and `.cursorrules` are generated only when the platform cannot natively consume `AGENTS.md`, and act strictly as minimal pointers.
 
 ---
 

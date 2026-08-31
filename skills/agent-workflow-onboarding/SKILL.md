@@ -20,29 +20,39 @@ Avoid pre-fragmenting project documentation into dozens of topical files. Consol
 
 ```text
 Project/
-├── AGENTS.md             # Rulebook: agent behavioral rules, constraints, build/verify commands & Knowledge Map
+├── AGENTS.md             # Rulebook: agent behavioral rules, constraints, verification mandate & Knowledge Map
 ├── Docs/
-│   ├── PROJECT.md        # Single consolidated project facts: Architecture, Components, Hardware, Protocols, OTA, etc.
+│   ├── PROJECT.md        # Single consolidated technical facts: Architecture, Build & Verification, Hardware, Protocols, OTA, etc.
 │   └── DECISIONS.md      # (Optional) Architecture Decision Records & rationale for non-obvious choices
 └── TASKS.md              # (Optional) Active task list, progress, and backlog (replaces separate status files)
 ```
 
-### 2. Promote-on-Pressure (Grow, Then Split)
-- **Do NOT split documents prematurely (KISS / YAGNI).** Start with sections inside `Docs/PROJECT.md`.
-- Promote a section into a standalone document (e.g., `Docs/OTA.md` or `Docs/PROTOCOL.md`) only when it naturally expands (e.g. >300 lines), requires independent access control, or has distinct ownership.
+### 2. Explicit Division: Behavioral Rules vs. Technical Facts
+- **`AGENTS.md` (Behavioral Rules):** Governs agent conduct, safety prohibitions, boundaries, commit policies, and the mandate to verify changes (e.g. *"Always run project verification after code changes; see Docs/PROJECT.md -> Build & Verification for exact commands"*), plus the project Knowledge Map.
+- **`Docs/PROJECT.md` (Technical Facts):** The single source of truth for technical facts, including the exact build, run, test, and verification commands/toolchain steps (`## Build & Verification`), system architecture, hardware mappings, protocols, and debugging notes.
+- *Rule:* Never duplicate concrete build/test commands in `AGENTS.md`. `AGENTS.md` mandates *that* verification must occur; `Docs/PROJECT.md` specifies *how* to execute it.
 
-### 3. Zero Derived State Duplication
-- **No `status.md`**. Task states and progress are tracked strictly in `TASKS.md`.
+### 3. Promote-on-Pressure (Grow, Then Split)
+- **Do NOT split documents prematurely (KISS / YAGNI).** Start with sections inside `Docs/PROJECT.md`.
+- Propose splitting a section into a standalone document (e.g. `Docs/OTA.md` or `Docs/PROTOCOL.md`) only when one or more conditions become true:
+  - The section becomes difficult to navigate within a single file;
+  - It has independent ownership or distinct team maintainers;
+  - It has a substantially different update cadence;
+  - It requires independent access or security control;
+  - Its size materially reduces usability (*line count, e.g. ~300+ lines, is a heuristic, not a rigid threshold*).
+
+### 4. Zero Derived State Duplication
+- **No `status.md`**. Task states, notes, and progress are tracked strictly in `TASKS.md`.
 - *Rule:* A fact that can be derived from another managed artifact must not be stored separately.
 
-### 4. Explicit Boundary: Rules vs. Facts vs. Workflows
-- **Global Skills:** Cross-project methodology & execution workflows (e.g., `systematic-debugging`, `write-agent-prompts`). Do not generate redundant project-level skills by default.
-- **`AGENTS.md`:** Project behavioral rules, permissions, boundaries, prohibitions, build/test commands.
-- **`Docs/PROJECT.md`:** Concrete technical facts, system architecture, hardware maps, protocols, and debugging notes.
-
-### 5. Platform Files as Thin Adapters
+### 5. Platform Adapters: Thin & Strictly On-Demand
 - `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, etc. are **thin adapters**, not knowledge stores.
-- They must only point to `./AGENTS.md` and `Docs/PROJECT.md`, never duplicating project rules or facts.
+- Only generate an adapter when the selected platform actually requires one. Do not create adapter files for platforms that natively consume `AGENTS.md` (e.g. OpenCode, Codex).
+- When generated, adapters must strictly point to `./AGENTS.md` and `Docs/PROJECT.md` without duplicating rules or facts.
+
+### 6. Role Boundaries: Global Skills vs. Project Assets
+- **Global Skills:** Cross-project methodology & execution workflows (e.g., `systematic-debugging`, `write-agent-prompts`). Do not generate redundant project-level skills by default.
+- **Project Assets (`AGENTS.md` + `Docs/PROJECT.md`):** Concrete project-specific rules, facts, and verification commands.
 
 ---
 
@@ -138,10 +148,10 @@ Stop and present the structured configuration options.
    C. Evolving 方案（Lean + TASKS.md + Docs/DECISIONS.md 架构决策）
    D. 自定义
 
-3. 平台适配器（生成指向 AGENTS.md 的极简 Adapter）：
-   A. 多平台兼容（CLAUDE.md + Cursor / OpenCode 等通用适配）
-   B. 仅 AGENTS.md（平台无关标准）
-   C. 仅指定平台（Codex / Claude Code / Cursor / OpenCode / Gemini CLI）
+3. 平台适配器（仅为不支持原生读取 AGENTS.md 的平台生成极简 Adapter）：
+   A. 按需生成（默认：原生支持 AGENTS.md 的平台不生成额外文件，其余生成极简 Adapter） (Recommended)
+   B. 仅 AGENTS.md（平台中立标准，不生成任何 Adapter 文件）
+   C. 指定平台 Adapter（如 Claude Code / Cursor）
    D. 自定义
 
 4. 文档语言：
@@ -167,8 +177,8 @@ Ask the user to reply compactly (e.g., `1A, 2A, 3A, 4A, 5A, 6A`).
 ### Phase 4 — Proposal (Mandatory Second Pause)
 Prepare a concrete file plan based on user choices. State:
 - Files to create with one-line purpose each.
-- Planned sections inside `Docs/PROJECT.md` based on tech stack (e.g., Architecture, Build, Hardware, Protocol, OTA).
-- Knowledge Map table to be included in `AGENTS.md`.
+- Planned sections inside `Docs/PROJECT.md` based on tech stack (Architecture, Build & Verification, Hardware, Protocol, OTA, etc.).
+- Dynamic Knowledge Map table to be placed in `AGENTS.md` (containing only rows for artifacts actually present).
 - Files to update or merge (if Reconcile mode).
 - Files explicitly out of scope / untouched.
 - Assumptions, evidence, and unresolved TODO markers.
@@ -177,10 +187,10 @@ Wait for explicit user confirmation before writing any file.
 
 ### Phase 5 — Generate (Only After Confirmation)
 Create only the approved files:
-- **`AGENTS.md`**: Contains agent rules, prohibitions, build/test commands, and the Knowledge Map.
+- **`AGENTS.md`**: Contains agent rules, prohibitions, verification policies (pointing to `Docs/PROJECT.md`), and the dynamic Knowledge Map.
 - **`Docs/PROJECT.md`**: Single consolidated technical source of truth. Include stack-specific sections:
   - Architecture & Component Map
-  - Build, Run & Verification Guide
+  - Build, Run & Verification Guide (exact commands, environments, and test steps)
   - Hardware & Peripheral Boundaries (if embedded/hardware)
   - Memory Map & Partition Layout (if firmware/embedded)
   - Communication Protocols & APIs (if network/inter-process)
@@ -189,7 +199,7 @@ Create only the approved files:
   - Testing & Quality Plan
 - **`Docs/DECISIONS.md`** (if Evolving profile selected): Architectural Decision Records.
 - **`TASKS.md`** (if Tracked/Evolving profile selected): Structured task tracker.
-- **Platform Adapters** (e.g. `CLAUDE.md`): Short references pointing to `AGENTS.md`.
+- **Platform Adapters** (only if requested and platform cannot read `AGENTS.md` natively): Short references pointing to `AGENTS.md` and `Docs/PROJECT.md`.
 
 ### Phase 6 — Review & Handoff
 Report:
@@ -199,21 +209,29 @@ Report:
 
 ---
 
-## Standard `AGENTS.md` Knowledge Map Template
+## Dynamic `AGENTS.md` Knowledge Map Rules
 
-Every generated `AGENTS.md` should include a Knowledge Map table to enable direct, single-lookup maintenance:
+Every generated `AGENTS.md` must include a Project Knowledge Map table. **Include only rows whose source-of-truth artifacts actually exist or are included in the approved generation plan.** Never generate ghost entries or dead links.
+
+### Base Knowledge Map (Lean Profile: `AGENTS.md` + `Docs/PROJECT.md`)
 
 ```markdown
 ## Project Knowledge Map
 
 | Knowledge Domain | Source of Truth | Scope & Notes |
 |---|---|---|
-| Agent Rules & Safety | `AGENTS.md` | Non-negotiable boundaries, build/test commands |
+| Agent Rules & Safety | `AGENTS.md` | Behavioral rules, safety boundaries, verification mandate |
 | System Architecture & Components | `Docs/PROJECT.md` | Section: Architecture & Component Map |
-| Build, Run & Verification | `Docs/PROJECT.md` | Section: Build & Verification |
+| Build, Run & Verification Facts | `Docs/PROJECT.md` | Section: Build, Run & Verification |
 | Hardware & Memory Map | `Docs/PROJECT.md` | Section: Hardware & Memory Map (if applicable) |
-| Protocols & APIs | `Docs/PROJECT.md` | Section: Protocols (if applicable) |
-| Debugging & Workarounds | `Docs/PROJECT.md` | Section: Debugging |
-| Architectural Decisions | `Docs/DECISIONS.md` | Non-obvious trade-offs and rationale |
-| Active Tasks & Progress | `TASKS.md` | Current task queue and progress status |
+| Protocols & APIs | `Docs/PROJECT.md` | Section: Communication Protocols (if applicable) |
+| Debugging & Workarounds | `Docs/PROJECT.md` | Section: Debugging & Known Workarounds |
 ```
+
+### Conditional Additions (Only if Artifacts Exist):
+- If `TASKS.md` exists or is approved:
+  `| Active Tasks & Progress | TASKS.md | Current task backlog and execution progress |`
+- If `Docs/DECISIONS.md` exists or is approved:
+  `| Architectural Decisions | Docs/DECISIONS.md | Non-obvious trade-offs and rationale |`
+- If a section was promoted to a standalone doc under pressure (e.g. `Docs/OTA.md`):
+  `| OTA & Firmware Update | Docs/OTA.md | Promoted dedicated specification |`

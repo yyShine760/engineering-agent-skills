@@ -14,27 +14,36 @@ Maintain an established, lean AI-agent collaboration system. Work strictly from 
 ### 1. Trigger-Driven Direct Lookup
 Never perform a broad multi-file survey. Execute a fast, single-lookup resolution flow:
 ```text
-Change Trigger (e.g. "OTA flash partition changed")
+Change Trigger (e.g. "OTA flash partition changed" or "Build command updated")
        ↓
 Read `AGENTS.md` (Project Knowledge Map)
        ↓
-Identify Single Source of Truth (e.g. `Docs/PROJECT.md` -> Memory Map / OTA)
+Identify Single Source of Truth (e.g. `Docs/PROJECT.md` -> Section: Build & Verification)
        ↓
 Inspect Code / Toolchain Evidence
        ↓
 Targeted Minimal Edit on that Single Section
 ```
 
-### 2. Single Source of Truth
-- Every domain has exactly one authoritative owner listed in the `AGENTS.md` Knowledge Map.
-- Update only the designated source of truth. Platform adapters (`CLAUDE.md`, etc.) are thin pointers and do not store duplicated facts.
+### 2. Single Source of Truth & Division of Responsibilities
+- **`AGENTS.md`:** Agent behavioral rules, safety boundaries, permissions, commit policies, and verification mandate.
+- **`Docs/PROJECT.md`:** All technical facts: architecture, component mapping, exact build/run/test/verification commands, hardware maps, protocols, OTA, and debugging notes.
+- **`Docs/DECISIONS.md`** *(if present)*: Architectural Decision Records & rationale.
+- **`TASKS.md`** *(if present)*: Active task backlog and execution progress.
+- Platform adapters (`CLAUDE.md`, etc.) are thin pointers; never store duplicated technical facts or rules inside them.
 
 ### 3. Promote-on-Pressure (Grow, Then Split)
 - By default, maintain information within its existing section in `Docs/PROJECT.md`.
-- **Only** when a specific section naturally outgrows its container (e.g., >300 lines of detailed protocol/hardware specs) or requires independent ownership, propose promoting it to a dedicated document (e.g., `Docs/OTA.md`) and update the Knowledge Map in `AGENTS.md` accordingly.
+- Propose promoting a section into a standalone document (e.g. `Docs/OTA.md`) only when one or more heuristic criteria are met:
+  - The section becomes difficult to navigate;
+  - It has independent ownership or distinct team maintainers;
+  - It has a substantially different update cadence;
+  - It requires independent access or security control;
+  - Its size materially reduces usability (*line count, e.g. ~300+ lines, is a heuristic, not a rigid threshold*).
+- When a document is promoted, update the corresponding row in the `AGENTS.md` Project Knowledge Map.
 
 ### 4. Zero Derived State
-- Maintain active tasks and progress exclusively in `TASKS.md`. Never create or sync separate status files.
+- Maintain active tasks and progress exclusively in `TASKS.md`. Never create, update, or sync separate status files.
 
 ---
 
@@ -54,13 +63,14 @@ Targeted Minimal Edit on that Single Section
 ### Phase 1 — Locate via Knowledge Map (Read-Only)
 1. Read `AGENTS.md` and inspect its **Project Knowledge Map**.
 2. Identify the authoritative document and section responsible for the triggered change:
-   - **Agent rules / prohibitions / build commands:** `AGENTS.md`
-   - **System architecture, hardware, protocols, OTA, debugging, build facts:** `Docs/PROJECT.md`
-   - **Architectural decisions / trade-offs:** `Docs/DECISIONS.md`
-   - **Active tasks / progress:** `TASKS.md`
+   - **Agent rules / permissions / safety boundaries / verification mandate:** `AGENTS.md`
+   - **Build, run, test & verification commands / toolchain facts:** `Docs/PROJECT.md` (Section: Build, Run & Verification)
+   - **System architecture / components / hardware / protocols / OTA / debugging:** `Docs/PROJECT.md` (Relevant section)
+   - **Architectural decisions / trade-offs:** `Docs/DECISIONS.md` (if present)
+   - **Active tasks / progress:** `TASKS.md` (if present)
 
 ### Phase 2 — Inspect Evidence (Read-Only)
-Inspect only the relevant source code, configuration, header, manifest, or linker script needed to verify the trigger. Do not perform a workspace-wide scan.
+Inspect only the relevant source code, configuration, header, manifest, or build/linker script needed to verify the trigger. Do not perform a workspace-wide scan.
 
 ### Phase 3 — Diff-Oriented Diagnosis
 Formulate the minimal change set. Distinguish:
@@ -73,7 +83,7 @@ Present the exact targeted change plan:
 - Target document and section to update.
 - Proposed diff summary (before vs. after).
 - Code evidence supporting the change.
-- Any promote-on-pressure split proposal (if a section has grown too large).
+- Any promote-on-pressure split proposal (if a section has grown too large, including proposed Knowledge Map row update).
 
 *Wait for user confirmation before making any file modifications.*
 
