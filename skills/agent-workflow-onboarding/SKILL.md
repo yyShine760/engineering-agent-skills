@@ -28,7 +28,7 @@ Project/
 ```
 
 ### 2. Explicit Division: Behavioral Rules vs. Technical Facts
-- **`AGENTS.md` (Behavioral Rules):** Governs agent conduct, safety prohibitions, boundaries, commit policies, and the mandate to verify changes (e.g. *"Always run project verification after code changes; see Docs/PROJECT.md -> Build & Verification for exact commands"*), plus the project Knowledge Map.
+- **`AGENTS.md` (Behavioral Rules):** Governs agent conduct, safety prohibitions, boundaries, Git & commit policies, and the mandate to verify changes (e.g. *"Always run project verification after code changes; see Docs/PROJECT.md -> Build & Verification for exact commands"*), plus the project Knowledge Map.
 - **`Docs/PROJECT.md` (Technical Facts):** The single source of truth for technical facts, including the exact build, run, test, and verification commands/toolchain steps (`## Build & Verification`), system architecture, hardware mappings, protocols, and debugging notes.
 - *Rule:* Never duplicate concrete build/test commands in `AGENTS.md`. `AGENTS.md` mandates *that* verification must occur; `Docs/PROJECT.md` specifies *how* to execute it.
 
@@ -179,6 +179,7 @@ Prepare a concrete file plan based on user choices. State:
 - Files to create with one-line purpose each.
 - Planned sections inside `Docs/PROJECT.md` based on tech stack (Architecture, Build & Verification, Hardware, Protocol, OTA, etc.).
 - Dynamic Knowledge Map table to be placed in `AGENTS.md` (containing only rows for artifacts actually present).
+- Standard Baseline Rules to be embedded into `AGENTS.md` (Git branching, operation approvals, Conventional Commits).
 - Files to update or merge (if Reconcile mode).
 - Files explicitly out of scope / untouched.
 - Assumptions, evidence, and unresolved TODO markers.
@@ -187,7 +188,7 @@ Wait for explicit user confirmation before writing any file.
 
 ### Phase 5 — Generate (Only After Confirmation)
 Create only the approved files:
-- **`AGENTS.md`**: Contains agent rules, prohibitions, verification policies (pointing to `Docs/PROJECT.md`), and the dynamic Knowledge Map.
+- **`AGENTS.md`**: Contains agent rules, standard baseline rules (Git branching & Conventional Commits), verification mandate (pointing to `Docs/PROJECT.md`), and the dynamic Knowledge Map.
 - **`Docs/PROJECT.md`**: Single consolidated technical source of truth. Include stack-specific sections:
   - Architecture & Component Map
   - Build, Run & Verification Guide (exact commands, environments, and test steps)
@@ -209,6 +210,25 @@ Report:
 
 ---
 
+## Standard Baseline Rules in Generated `AGENTS.md`
+
+Every generated `AGENTS.md` must automatically incorporate these baseline engineering collaboration rules (phrased idiomatically in the target project language):
+
+### 1. 分支与 Git 操作 (Branching & Git Operations)
+- **独立功能分支开发：** 所有代码修改必须在独立的功能/特性分支上进行，**严禁直接在 `main` 或 `develop` 主分支上修改**。功能分支默认从 `develop` 切出；若项目中尚无 `develop` 分支，或当前改动所属分支不明确，必须先向用户询问确认。
+- **Git 操作授权审批：** 不自动执行 `git commit`、`git merge`、`git rebase`、`git push`、`git tag` 等变更版本历史或远端状态的操作。这些 Git 操作必须事先获得用户明确批准。
+
+### 2. 提交规范与版本 (Commits & Versioning)
+- **Conventional Commits 规范：** 提交信息必须遵循 `<type>(<scope>): <description>` 格式。
+- **常用类型（type）：** 包括 `feat`（新功能）、`fix`（Bug修复）、`chore`（构建依赖/杂项）、`build`（构建系统）、`refactor`（代码重构）、`test`（测试用例）、`docs`（文档）、`style`（代码格式）等常规类型。
+- **范围（scope）：** 使用受影响的模块/子系统名称命名。
+
+### 3. 代码变更验证机制 (Verification Mandate)
+- 代码修改完成后，必须执行项目规定的构建与测试验证流程。
+- 具体构建与验证命令见 `Docs/PROJECT.md` -> `Build, Run & Verification` 章节。
+
+---
+
 ## Dynamic `AGENTS.md` Knowledge Map Rules
 
 Every generated `AGENTS.md` must include a Project Knowledge Map table. **Include only rows whose source-of-truth artifacts actually exist or are included in the approved generation plan.** Never generate ghost entries or dead links.
@@ -220,7 +240,7 @@ Every generated `AGENTS.md` must include a Project Knowledge Map table. **Includ
 
 | Knowledge Domain | Source of Truth | Scope & Notes |
 |---|---|---|
-| Agent Rules & Safety | `AGENTS.md` | Behavioral rules, safety boundaries, verification mandate |
+| Agent Rules & Safety | `AGENTS.md` | Behavioral rules, safety boundaries, Git policies, verification mandate |
 | System Architecture & Components | `Docs/PROJECT.md` | Section: Architecture & Component Map |
 | Build, Run & Verification Facts | `Docs/PROJECT.md` | Section: Build, Run & Verification |
 | Hardware & Memory Map | `Docs/PROJECT.md` | Section: Hardware & Memory Map (if applicable) |

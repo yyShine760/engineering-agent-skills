@@ -26,7 +26,7 @@ Targeted Minimal Edit on that Single Section
 ```
 
 ### 2. Single Source of Truth & Division of Responsibilities
-- **`AGENTS.md`:** Agent behavioral rules, safety boundaries, permissions, commit policies, and verification mandate.
+- **`AGENTS.md`:** Agent behavioral rules, safety boundaries, permissions, Git branching & Conventional Commits policies, and verification mandate.
 - **`Docs/PROJECT.md`:** All technical facts: architecture, component mapping, exact build/run/test/verification commands, hardware maps, protocols, OTA, and debugging notes.
 - **`Docs/DECISIONS.md`** *(if present)*: Architectural Decision Records & rationale.
 - **`TASKS.md`** *(if present)*: Active task backlog and execution progress.
@@ -63,7 +63,7 @@ Targeted Minimal Edit on that Single Section
 ### Phase 1 — Locate via Knowledge Map (Read-Only)
 1. Read `AGENTS.md` and inspect its **Project Knowledge Map**.
 2. Identify the authoritative document and section responsible for the triggered change:
-   - **Agent rules / permissions / safety boundaries / verification mandate:** `AGENTS.md`
+   - **Agent rules / permissions / Git policies / verification mandate:** `AGENTS.md`
    - **Build, run, test & verification commands / toolchain facts:** `Docs/PROJECT.md` (Section: Build, Run & Verification)
    - **System architecture / components / hardware / protocols / OTA / debugging:** `Docs/PROJECT.md` (Relevant section)
    - **Architectural decisions / trade-offs:** `Docs/DECISIONS.md` (if present)
