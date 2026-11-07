@@ -108,6 +108,21 @@
 - 最后：DOM 启发式
 - 失败就标注 `unavailable`，不要编造
 
+## Extraction strategies
+
+| source | 适用 | 说明 |
+|---|---|---|
+| `ssr` | SPA 首屏数据 | 读取 `__INITIAL_STATE__` / `__NEXT_DATA__` / `ytInitialData`，深度安全序列化 |
+| `api` | 结构化接口 | 重放 probe 发现的 URL；替换 `cursor` / `offset` / `page` / `pagination_str` |
+| `dom` | 无结构化数据 | 启发式；作者/正文可能不准，`warnings` 会标注 |
+
+字段兼容：
+
+- 评论作者：`userInfo.nickname` / `user.nickname` / `member.uname` / `nickname`
+- 评论文本：`content` 字符串、`content.message`、`text`、`comment`、`message`
+- 纯图片/视频评论：输出 `[image]` / `[video]`，不输出空字符串
+- 点赞：`likeCount` / `likes` / `digg_count` / `like_count` / `like`
+
 ## Engine choice
 
 ```

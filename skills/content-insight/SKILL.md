@@ -55,7 +55,24 @@ python3 <skill-dir>/scripts/probe.py "<url>" \
 }
 ```
 
-## Step 2 — 按 content_type + source 执行
+## Step 2 — 执行抽取
+
+probe 给出 capabilities 后，用 `extract.py` 执行：
+
+```bash
+python3 <skill-dir>/scripts/extract.py "<url>" \
+  --source ssr|api|dom \
+  --limit 10 [--api-url URL] [--cursor C] [--max-pages 1] \
+  --session <name> --profile <path> [--direct]
+```
+
+- `ssr`：从 `__INITIAL_STATE__` / `__NEXT_DATA__` / `ytInitialData` 提取正文、图片、评论
+- `api`：重放 probe 发现的评论接口；`--api-url` 必填，`--cursor` 可选
+- `dom`：无结构化数据时的启发式兜底，低置信度
+
+输出已经是统一 schema；如果某字段为空，先看 `warnings`。
+
+## Step 3 — 按 content_type + source 执行
 
 ### contentType = "video"
 
@@ -83,7 +100,7 @@ python3 <skill-dir>/scripts/probe.py "<url>" \
 - 图片：`preview.images`
 - 评论：按 `comments.source`
 
-## Step 3 — 按 source 执行
+## Step 4 — source 细节
 
 ### comments.source = "api"
 
@@ -129,7 +146,7 @@ python3 <skill-dir>/scripts/probe.py "<url>" \
 - `dom`：按时间戳正则提取，例如 `00:23 标题`
 - `none`：用字幕切分，或从 transcript 生成，标注 `source: derived`
 
-## Step 4 — 输出
+## Step 5 — 输出
 
 统一 schema：
 
