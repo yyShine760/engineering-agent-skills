@@ -203,12 +203,23 @@ async page => {
     };
     const longestText = () => {
       const exclude = /comment|reply|nav|footer|header|sidebar|menu|avatar/i;
-      const blocks = [...document.querySelectorAll('article, main, [class*=content], [class*=desc], [class*=body], [class*=note-text], [class*=post]')]
-        .filter(el => !exclude.test(String(el.className) + ' ' + String(el.id)))
-        .map(el => (el.innerText || '').trim())
-        .filter(t => t.length > 40 && t.length < 6000)
-        .sort((a, b) => b.length - a.length);
-      return blocks[0] || '';
+      const pickLongest = els => {
+        const blocks = els
+          .filter(el => !exclude.test(String(el.className) + ' ' + String(el.id)))
+          .map(el => (el.innerText || '').trim())
+          .filter(t => t.length > 40 && t.length < 20000)
+          .sort((a, b) => b.length - a.length);
+        return blocks[0] || '';
+      };
+      const rich = [...document.querySelectorAll('[class]')]
+        .filter(el => /richtext|rich-text|answer/i.test(String(el.className)));
+      if (rich.length) {
+        const picked = pickLongest(rich);
+        if (picked) return picked;
+      }
+      return pickLongest([
+        ...document.querySelectorAll('article, main, [class*="content"], [class*="desc"], [class*="body"], [class*="note-text"], [class*="post"]')
+      ]);
     };
     const imgs = () => {
       const out = [];
@@ -257,9 +268,11 @@ async page => {
     const pathHint = location.hostname + location.pathname;
     const threadHint = /(tieba|forum|thread|status|question|topic|discuss|\/p\/)/i.test(pathHint);
 
+    const articleHint = /(article|answer|post|blog|news|story)/i.test(pathHint);
     let contentType = 'article';
     if (videoCount > 0) contentType = 'video';
     else if (threadHint && replyCount > 3) contentType = 'thread';
+    else if (articleHint) contentType = 'article';
     else if (images.length >= 2) contentType = 'image_text';
 
     const host = location.hostname;
