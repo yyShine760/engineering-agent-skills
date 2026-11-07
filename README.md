@@ -44,6 +44,7 @@ Project/
 | **`agent-workflow-onboarding`** | Interactively survey an unfamiliar codebase and establish a **Lean Knowledge System** (`AGENTS.md` + `Docs/PROJECT.md`, with built-in Git branching & Conventional Commits baseline rules). | Initializing or migrating repositories to the Lean Agent Architecture. |
 | **`agent-workflow-maintenance`** | **Trigger-driven**, conservative maintenance that maps change triggers directly to the single source of truth via the `AGENTS.md` Knowledge Map. | Keeping project facts and rules aligned after code, build, or architecture changes. |
 | **`write-agent-prompts`** | Draft, compress, review, or split copy-ready, decision-critical execution prompts for AI subagents. | Delegating tasks to subagents with explicit boundaries, acceptance checks, and zero fluff. |
+| **`video-insight`** | Platform-agnostic video probe: discovers chapters, subtitles, and comments on YouTube, Douyin, Xiaohongshu, Bilibili, and unfamiliar sites by inspecting real page requests instead of hardcoded adapters. | Extracting video structure and audience reactions from an arbitrary video URL. |
 
 ---
 
@@ -129,6 +130,12 @@ engineering-agent-skills/
     │   ├── SKILL.md
     │   └── agents/
     │       └── openai.yaml
+    ├── video-insight/
+    │   ├── SKILL.md
+    │   ├── reference.md
+    │   └── scripts/
+    │       ├── probe.js
+    │       └── probe.py
     └── write-agent-prompts/
         ├── SKILL.md
         └── agents/
