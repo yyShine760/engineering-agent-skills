@@ -22,3 +22,6 @@ temp/
 # Python
 __pycache__/
 *.py[cod]
+
+# Playwright CLI artifacts
+.playwright-cli/
