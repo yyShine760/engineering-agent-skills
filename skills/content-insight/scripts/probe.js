@@ -183,15 +183,117 @@ async page => {
         }
       } catch (e) {}
     }
+
+    const meta = name => {
+      const m = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+      return m && m.content ? m.content.trim() : '';
+    };
+    const jsonldBody = () => {
+      for (const s of document.querySelectorAll('script[type="application/ld+json"]')) {
+        try {
+          const j = JSON.parse(s.textContent);
+          const arr = Array.isArray(j) ? j : [j];
+          for (const x of arr) {
+            if (x.articleBody) return String(x.articleBody);
+            if (x.description) return String(x.description);
+          }
+        } catch (e) {}
+      }
+      return '';
+    };
+    const longestText = () => {
+      const exclude = /comment|reply|nav|footer|header|sidebar|menu|avatar/i;
+      const blocks = [...document.querySelectorAll('article, main, [class*=content], [class*=desc], [class*=body], [class*=note-text], [class*=post]')]
+        .filter(el => !exclude.test(String(el.className) + ' ' + String(el.id)))
+        .map(el => (el.innerText || '').trim())
+        .filter(t => t.length > 40 && t.length < 6000)
+        .sort((a, b) => b.length - a.length);
+      return blocks[0] || '';
+    };
+    const imgs = () => {
+      const out = [];
+      const push = src => {
+        if (!src || !/^https?:/.test(src) || out.includes(src)) return;
+        out.push(src);
+      };
+      const junk = /(banner|recommend|rcmd|avatar|icon|logo|sprite|thumb-small)/i;
+
+      push(meta('og:image'));
+
+      const containers = document.querySelectorAll('article, main, [class*=content], [class*=desc], [class*=body], [class*=note]');
+      for (const c of containers) {
+        for (const img of c.querySelectorAll('img')) {
+          const src = img.currentSrc || img.src || '';
+          if (junk.test(src)) continue;
+          if ((img.naturalWidth || 0) < 120 || (img.naturalHeight || 0) < 120) continue;
+          push(src);
+          if (out.length >= 9) return out;
+        }
+      }
+
+      for (const img of document.querySelectorAll('img')) {
+        const src = img.currentSrc || img.src || '';
+        if (junk.test(src)) continue;
+        if ((img.naturalWidth || 0) < 200 || (img.naturalHeight || 0) < 200) continue;
+        push(src);
+        if (out.length >= 9) break;
+      }
+      return out;
+    };
+
+    const videoCount = document.querySelectorAll('video').length;
+    const trackCount = document.querySelectorAll('track').length;
+    const commentCount = document.querySelectorAll('[class*=comment],[data-e2e*=comment]').length;
+    const chapterCount = document.querySelectorAll('[class*=chapter]').length;
+    const replyCount = document.querySelectorAll('[class*=reply],[data-e2e*=reply]').length;
+
+    const images = imgs();
+    const jb = jsonldBody();
+    const od = meta('og:description') || meta('description');
+    const db = longestText();
+    const body = jb || od || db;
+    const bodySource = jb ? 'jsonld' : od ? 'og' : db ? 'dom' : 'none';
+
+    const pathHint = location.hostname + location.pathname;
+    const threadHint = /(tieba|forum|thread|status|question|topic|discuss|\/p\/)/i.test(pathHint);
+
+    let contentType = 'article';
+    if (videoCount > 0) contentType = 'video';
+    else if (threadHint && replyCount > 3) contentType = 'thread';
+    else if (images.length >= 2) contentType = 'image_text';
+
+    const host = location.hostname;
+    const platform =
+      /douyin/.test(host) ? 'douyin' :
+      /xiaohongshu/.test(host) ? 'xiaohongshu' :
+      /bilibili/.test(host) ? 'bilibili' :
+      /youtube/.test(host) ? 'youtube' :
+      /tieba/.test(host) ? 'tieba' :
+      /(x\.com|twitter\.com)/.test(host) ? 'x' :
+      /weibo/.test(host) ? 'weibo' :
+      /zhihu/.test(host) ? 'zhihu' : 'unknown';
+
+    const videoEl = document.querySelector('video');
+
     return {
       url: location.href,
       title: document.title,
-      video: document.querySelectorAll('video').length,
-      track: document.querySelectorAll('track').length,
-      commentish: document.querySelectorAll('[class*=comment],[data-e2e*=comment]').length,
-      chapterish: document.querySelectorAll('[class*=chapter]').length,
+      platform,
+      contentType,
+      video: videoCount,
+      track: trackCount,
+      commentish: commentCount,
+      chapterish: chapterCount,
       embedded,
       embeddedHasComments,
+      preview: {
+        title: meta('og:title') || document.title,
+        description: od,
+        body: body.slice(0, 600),
+        bodySource,
+        images,
+        video: videoEl ? (videoEl.currentSrc || videoEl.src || '').slice(0, 300) : '',
+      },
     };
   });
 
@@ -228,6 +330,9 @@ async page => {
   return JSON.stringify({
     url: dom.url,
     title: dom.title,
+    platform: dom.platform,
+    contentType: dom.contentType,
+    preview: dom.preview,
     capabilities,
     dom: { video: dom.video, track: dom.track, commentish: dom.commentish, chapterish: dom.chapterish, embedded: dom.embedded },
     totalRequests: reqs.length,

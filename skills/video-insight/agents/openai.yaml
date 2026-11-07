@@ -1,4 +1,0 @@
-interface:
-  display_name: "Video Insight"
-  short_description: "Probe and analyze video pages on any platform"
-  default_prompt: "Use $video-insight to probe this video URL and extract chapters, subtitles, and comments."

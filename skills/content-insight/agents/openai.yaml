@@ -1,0 +1,4 @@
+interface:
+  display_name: "Content Insight"
+  short_description: "Probe and analyze any URL: video, notes, threads, articles"
+  default_prompt: "Use $content-insight to probe this URL and extract its body, chapters, subtitles, comments, or replies."
