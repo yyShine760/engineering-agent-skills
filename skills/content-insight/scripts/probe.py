@@ -17,7 +17,7 @@ import re
 import subprocess
 import sys
 
-from common import environment, normalize_url, resolve_short_url
+from common import environment, normalize_url, profile_owners, resolve_short_url
 
 
 def run(cmd, env):
@@ -70,6 +70,15 @@ def main():
 
     listed = run(["playwright-cli", "list"], env).stdout
     if f"- {args.session}:" not in listed:
+        owners = profile_owners(listed, profile, args.session)
+        if owners:
+            print(json.dumps({
+                "error": "profile already in use",
+                "profile": profile,
+                "occupiedBy": owners,
+                "hint": "close the listed sessions or pass a different --profile",
+            }))
+            return 1
         opened = run([
             "playwright-cli", f"-s={args.session}", "open",
             "--persistent", f"--profile={profile}", target
@@ -82,7 +91,15 @@ def main():
                 "--persistent", f"--profile={profile}", target
             ], env)
         if opened.returncode != 0:
-            print(json.dumps({"error": "open failed after retry", "stderr": opened.stderr[-500:]}))
+            listed_now = run(["playwright-cli", "list"], env).stdout
+            owners = profile_owners(listed_now, profile, args.session)
+            print(json.dumps({
+                "error": "open failed after retry",
+                "profile": profile,
+                "occupiedBy": owners,
+                "hint": "close the listed sessions or pass a different --profile",
+                "stderr": opened.stderr[-500:],
+            }))
             return 1
     else:
         navigated = run([

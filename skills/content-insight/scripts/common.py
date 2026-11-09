@@ -1,9 +1,29 @@
 """Shared helpers for content-insight scripts."""
 import importlib.util
+import os
 import re
 import shutil
 import urllib.request
 from urllib.parse import parse_qs, urlparse
+
+
+def profile_owners(list_output, profile, exclude=None):
+    """Find sessions currently holding the given profile directory."""
+    owners = []
+    current = None
+    target = os.path.expanduser(profile)
+    for line in list_output.splitlines():
+        if line.startswith("- "):
+            m = re.match(r"^\- ([^:]+):", line)
+            if m:
+                current = m.group(1).strip()
+            continue
+        if current and "user-data-dir:" in line:
+            path = line.split("user-data-dir:", 1)[1].strip()
+            if os.path.expanduser(path) == target and current != exclude:
+                owners.append(current)
+            current = None
+    return owners
 
 
 def environment():
