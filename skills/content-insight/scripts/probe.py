@@ -17,7 +17,7 @@ import re
 import subprocess
 import sys
 
-from common import normalize_url, resolve_short_url
+from common import environment, normalize_url, resolve_short_url
 
 
 def run(cmd, env):
@@ -109,6 +109,7 @@ def main():
         return 0
     parsed["requestedUrl"] = args.url
     parsed["normalizedUrl"] = target
+    parsed["environment"] = environment()
     print(json.dumps(parsed, ensure_ascii=False, indent=2))
 
     if args.close:

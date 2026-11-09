@@ -1,7 +1,17 @@
 """Shared helpers for content-insight scripts."""
+import importlib.util
 import re
+import shutil
 import urllib.request
 from urllib.parse import parse_qs, urlparse
+
+
+def environment():
+    """Report which local extraction fallbacks are actually available."""
+    return {
+        "ffmpeg": shutil.which("ffmpeg") is not None,
+        "faster_whisper": importlib.util.find_spec("faster_whisper") is not None,
+    }
 
 
 def resolve_short_url(url, timeout=8):

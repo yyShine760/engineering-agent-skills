@@ -364,7 +364,11 @@ async page => {
       result.selector = args.selector;
       warnings.push(`selector matched ${textData.count} elements`);
     } else {
-      result.body = (textData.text || '').slice(0, 30000);
+      const raw = (textData.text || '');
+      result.body = raw.slice(0, 30000);
+      if (raw.length < 800 || /登录|备案|导航|精选|推荐/i.test(raw.slice(0, 300))) {
+        warnings.push('text without selector looks like navigation; pass --selector (see probe.selectorCandidates)');
+      }
     }
     result.comments = [];
   }

@@ -306,6 +306,24 @@ async page => {
       /weibo/.test(host) ? 'weibo' :
       /zhihu/.test(host) ? 'zhihu' : 'unknown';
 
+    const selectorCandidates = () => {
+      const counts = {};
+      for (const el of document.querySelectorAll('[class]')) {
+        const raw = el.getAttribute('class') || '';
+        const cls = raw.trim().split(/\s+/)[0];
+        if (!cls || cls.length > 40) continue;
+        counts[cls] = (counts[cls] || 0) + 1;
+      }
+      return Object.entries(counts)
+        .filter(([cls, n]) => n >= 3 && n <= 200)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([cls, count]) => ({ selector: '.' + cls, count }));
+    };
+
+    const loginWall = /passport|signin|sso|website-login|login\b/i.test(location.href) ||
+      /扫码登录|登录后即可|sign in to continue|log in to continue/i.test((document.body.innerText || '').slice(0, 300));
+
     const videoEl = document.querySelector('video');
 
     return {
@@ -319,6 +337,7 @@ async page => {
       chapterish: chapterCount,
       embedded,
       embeddedHasComments,
+      loginWall,
       preview: {
         title: meta('og:title') || document.title,
         description: od,
@@ -327,6 +346,7 @@ async page => {
         images,
         video: videoEl ? (videoEl.currentSrc || videoEl.src || '').slice(0, 300) : '',
         chapters: chapterLines(),
+        selectorCandidates: selectorCandidates(),
       },
     };
   });
@@ -366,6 +386,7 @@ async page => {
     title: dom.title,
     platform: dom.platform,
     contentType: dom.contentType,
+    loginWall: dom.loginWall,
     preview: dom.preview,
     capabilities,
     dom: { video: dom.video, track: dom.track, commentish: dom.commentish, chapterish: dom.chapterish, embedded: dom.embedded },

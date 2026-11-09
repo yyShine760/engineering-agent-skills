@@ -148,3 +148,5 @@ HTTP + 结构化数据  →  yt-dlp  →  browser (playwright)
 4. **画面理解**：probe 只处理文本/接口；"画面里有什么"需要抽帧 + 视觉模型。
 5. **平台改版**：DOM 选择器和接口路径会变；notes 过期时退回 probe 的通用路径。
 6. **隐私与合规**：只采集公开内容；控制频率；不要用于批量商用或绕过访问控制。
+7. **未验证项**：短链解析（`v.douyin.com` / `xhslink.com`）、profile 冲突重试、iframe/shadow DOM 内的文本，均未实测。
+8. **selector 不是预置知识**：B 站/贴吧的正确容器 class 随版本变化；用 `probe.selectorCandidates` 现场选，不要猜。

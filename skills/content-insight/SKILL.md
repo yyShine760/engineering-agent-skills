@@ -42,6 +42,7 @@ python3 <skill-dir>/scripts/probe.py "<url>" \
 {
   "platform": "unknown|douyin|xiaohongshu|bilibili|youtube|tieba|x|weibo|zhihu",
   "contentType": "video|image_text|thread|article",
+  "loginWall": false,
   "preview": {
     "title": "...",
     "description": "...",
@@ -49,14 +50,16 @@ python3 <skill-dir>/scripts/probe.py "<url>" \
     "bodySource": "jsonld|og|dom|none",
     "images": ["..."],
     "video": "...",
-    "chapters": [ { "start": "00:23", "title": "..." } ]
+    "chapters": [ { "start": "00:23", "title": "..." } ],
+    "selectorCandidates": [ { "selector": ".note-item", "count": 22 } ]
   },
   "capabilities": {
     "comments": { "source": "api|ssr|dom|none", "confidence": "high|medium|low|none" },
     "subtitle": { "source": "api|track|none", "format": "text|unknown" },
     "chapters": { "source": "api|dom|none" }
   },
-  "candidates": [ { "kind": "comments|subtitle|chapters|meta|binary|other", "url": "..." } ]
+  "candidates": [ { "kind": "comments|subtitle|chapters|meta|binary|other", "url": "..." } ],
+  "environment": { "ffmpeg": false, "faster_whisper": false }
 }
 ```
 
@@ -77,6 +80,10 @@ python3 <skill-dir>/scripts/extract.py "<url>" \
 - `dom`：无结构化数据时的启发式兜底，低置信度。
 
 正确的选择顺序：`text` → `api` / `ssr`（有结构化数据时）→ `dom`。
+
+`extract.py` 默认结束后关闭浏览器；需要连续操作时加 `--keep`。
+
+优先用 `preview.selectorCandidates` 里的候选，不要猜 selector；0 匹配时 `warnings` 会明确提示。
 
 输出已经是统一 schema；如果某字段为空，先看 `warnings`。
 

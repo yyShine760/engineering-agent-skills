@@ -20,7 +20,7 @@ import re
 import subprocess
 import sys
 
-from common import normalize_url, resolve_short_url
+from common import environment, normalize_url, resolve_short_url
 
 
 def run(cmd, env):
@@ -56,7 +56,7 @@ def main():
     ap.add_argument("--session", default="content-extract")
     ap.add_argument("--profile", default="~/.config/content-probe-profile")
     ap.add_argument("--direct", action="store_true")
-    ap.add_argument("--close", action="store_true")
+    ap.add_argument("--keep", action="store_true", help="leave the browser session open")
     args = ap.parse_args()
 
     env = os.environ.copy()
@@ -132,9 +132,10 @@ def main():
             return 0
         parsed["requestedUrl"] = args.url
         parsed["normalizedUrl"] = target
+        parsed["environment"] = environment()
         print(json.dumps(parsed, ensure_ascii=False, indent=2))
 
-        if args.close:
+        if not args.keep:
             run(["playwright-cli", f"-s={args.session}", "close"], env)
         return 0
     finally:
