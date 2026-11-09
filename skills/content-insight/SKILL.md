@@ -20,8 +20,12 @@ description: Retrieve and analyze content from any platform — video, image-tex
 
 ```bash
 python3 <skill-dir>/scripts/probe.py "<url>" \
-  --session <session-name> --profile <profile-path> [--direct] [--keep]
+  --session <session-name> --profile <profile-path> [--direct] [--close]
 ```
+
+默认保留浏览器会话，方便后续 `extract.py` 复用同一个 session；只有 `--close` 才关闭。
+
+`probe.py` 会自动归一化 URL：`douyin.com/user/self?modal_id=...` → `douyin.com/video/<id>`，输出里的 `normalizedUrl` 是实际打开的地址。
 
 参数选择：
 
@@ -44,7 +48,8 @@ python3 <skill-dir>/scripts/probe.py "<url>" \
     "body": "...",
     "bodySource": "jsonld|og|dom|none",
     "images": ["..."],
-    "video": "..."
+    "video": "...",
+    "chapters": [ { "start": "00:23", "title": "..." } ]
   },
   "capabilities": {
     "comments": { "source": "api|ssr|dom|none", "confidence": "high|medium|low|none" },
@@ -61,14 +66,17 @@ probe 给出 capabilities 后，用 `extract.py` 执行：
 
 ```bash
 python3 <skill-dir>/scripts/extract.py "<url>" \
-  --source ssr|api|dom \
-  --limit 10 [--api-url URL] [--cursor C] [--max-pages 1] \
+  --source text|ssr|api|dom \
+  --limit 10 [--selector "CSS"] [--api-url URL] [--cursor C] [--max-pages 1] \
   --session <name> --profile <path> [--direct]
 ```
 
-- `ssr`：从 `__INITIAL_STATE__` / `__NEXT_DATA__` / `ytInitialData` 提取正文、图片、评论
-- `api`：重放 probe 发现的评论接口；`--api-url` 必填，`--cursor` 可选
-- `dom`：无结构化数据时的启发式兜底，低置信度
+- `text`：直接读 `document.body.innerText`；带 `--selector` 时只取匹配元素，返回 `texts`。**默认优先用它**——最便宜，也不会像启发式那样猜错。
+- `ssr`：从 `__INITIAL_STATE__` / `__NEXT_DATA__` / `ytInitialData` 提取正文、图片、评论。
+- `api`：重放 probe 发现的评论接口；`--api-url` 必填，`--cursor` 可选。
+- `dom`：无结构化数据时的启发式兜底，低置信度。
+
+正确的选择顺序：`text` → `api` / `ssr`（有结构化数据时）→ `dom`。
 
 输出已经是统一 schema；如果某字段为空，先看 `warnings`。
 
@@ -122,10 +130,11 @@ python3 <skill-dir>/scripts/extract.py "<url>" \
 
 ### comments.source = "dom"
 
-1. `playwright-cli --raw snapshot` 找评论容器
-2. 滚动容器本身（不是 `window`）
-3. 边滚边收，按 id 去重
-4. 虚拟列表会卸载节点，不要"滚到底再抓"
+1. 先用 `document.querySelectorAll('[class*=comment], [data-e2e*=comment]')` 统计候选
+2. 虚拟列表和 `aria-hidden` 内容不在可访问性树里，`snapshot` 只作辅助，不要作为主路径
+3. 滚动容器本身（不是 `window`）
+4. 边滚边收，按 id 去重
+5. 找不到结构时退回 `extract.py --source text`
 
 ### subtitle.source = "api" / "track"
 
@@ -134,16 +143,24 @@ python3 <skill-dir>/scripts/extract.py "<url>" \
 
 ### subtitle.source = "none"
 
+先做环境自检：
+
+```bash
+command -v ffmpeg || echo "ffmpeg missing"
+python3 -c "import faster_whisper" 2>/dev/null || echo "faster_whisper missing"
+```
+
 降级链，逐级标注：
 
 1. ASR：下载音轨 → faster-whisper → `source: asr`
 2. OCR：抽帧 → tesseract → `source: ocr`
-3. 都没有：`source: none`，不要伪造
+3. 工具缺失：`source: unavailable`，不要给跑不起来的方案
+4. 都没有：`source: none`，不要伪造
 
 ### chapters.source = "api" / "dom"
 
 - `api`：按字段解析（`chapters` / `points` / `video_chapters`）
-- `dom`：按时间戳正则提取，例如 `00:23 标题`
+- `dom`：抖音等平台把章节渲染成普通文本，**直接读 `innerText` 比猜选择器稳**；probe 的 `preview.chapters` 已给出前几条
 - `none`：用字幕切分，或从 transcript 生成，标注 `source: derived`
 
 ## Step 5 — 输出

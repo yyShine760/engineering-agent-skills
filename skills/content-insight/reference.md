@@ -115,6 +115,7 @@
 
 | source | 适用 | 说明 |
 |---|---|---|
+| `text` | 任何页面 | 直接读 `innerText`；`--selector` 时返回匹配元素的 `texts`。**默认优先** |
 | `ssr` | SPA 首屏数据 | 读取 `__INITIAL_STATE__` / `__NEXT_DATA__` / `ytInitialData`，深度安全序列化 |
 | `api` | 结构化接口 | 重放 probe 发现的 URL；替换 `cursor` / `offset` / `page` / `pagination_str` |
 | `dom` | 无结构化数据 | 启发式；作者/正文可能不准，`warnings` 会标注 |

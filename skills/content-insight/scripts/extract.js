@@ -345,6 +345,30 @@ async page => {
     if (result.comments.length >= limit) result.capabilities.comment_paging = true;
   }
 
+  if (args.source === 'text') {
+    const textData = await page.evaluate(sel => {
+      if (sel) {
+        const els = [...document.querySelectorAll(sel)];
+        return {
+          mode: 'selector',
+          count: els.length,
+          texts: els.map(e => (e.innerText || '').trim()).filter(Boolean).slice(0, 50),
+        };
+      }
+      return { mode: 'body', text: document.body.innerText || '' };
+    }, args.selector || '');
+
+    if (textData.mode === 'selector') {
+      result.body = (textData.texts[0] || '').slice(0, 30000);
+      result.texts = textData.texts;
+      result.selector = args.selector;
+      warnings.push(`selector matched ${textData.count} elements`);
+    } else {
+      result.body = (textData.text || '').slice(0, 30000);
+    }
+    result.comments = [];
+  }
+
   if (!result.meta.title) result.meta.title = preview.title || '';
   if (!result.body) result.body = preview.description || '';
   if (!result.meta.author) warnings.push('author not resolved');

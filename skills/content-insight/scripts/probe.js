@@ -252,6 +252,23 @@ async page => {
       return out;
     };
 
+    const chapterLines = () => {
+      const lines = (document.body.innerText || '').split('\n').map(s => s.trim()).filter(Boolean);
+      const out = [];
+      for (let i = 0; i < lines.length && out.length < 8; i++) {
+        const combined = lines[i].match(/^(\d{2}:\d{2}(?::\d{2})?)\s+(.+)$/);
+        if (combined) {
+          out.push({ start: combined[1], title: combined[2].slice(0, 60) });
+          continue;
+        }
+        const only = lines[i].match(/^(\d{2}:\d{2}(?::\d{2})?)$/);
+        if (only && i + 1 < lines.length) {
+          out.push({ start: only[1], title: lines[i + 1].slice(0, 60) });
+        }
+      }
+      return out;
+    };
+
     const videoCount = document.querySelectorAll('video').length;
     const trackCount = document.querySelectorAll('track').length;
     const commentCount = document.querySelectorAll('[class*=comment],[data-e2e*=comment]').length;
@@ -306,6 +323,7 @@ async page => {
         bodySource,
         images,
         video: videoEl ? (videoEl.currentSrc || videoEl.src || '').slice(0, 300) : '',
+        chapters: chapterLines(),
       },
     };
   });
@@ -327,11 +345,11 @@ async page => {
       ? { source: 'api', confidence: 'high', format: /webvtt|vtt|srt/.test(best('subtitle').head) ? 'text' : 'unknown', url: best('subtitle').url }
       : dom.track > 0
         ? { source: 'track', confidence: 'medium' }
-        : { source: 'none', confidence: 'none' },
+        : { source: 'none', confidence: 'none', note: 'no caption track or endpoint' },
     chapters: best('chapters')
       ? { source: 'api', confidence: 'high', url: best('chapters').url }
       : dom.chapterish > 0
-        ? { source: 'dom', confidence: 'medium' }
+        ? { source: 'dom', confidence: 'medium', note: 'rendered as plain text' }
         : { source: 'none', confidence: 'none' },
   };
 

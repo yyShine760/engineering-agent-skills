@@ -20,6 +20,8 @@ import re
 import subprocess
 import sys
 
+from common import normalize_url
+
 
 def run(cmd, env):
     return subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=300)
@@ -45,15 +47,16 @@ def extract_json(text):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
-    ap.add_argument("--source", required=True, choices=["ssr", "api", "dom"])
+    ap.add_argument("--source", required=True, choices=["ssr", "api", "dom", "text"])
     ap.add_argument("--limit", type=int, default=10)
+    ap.add_argument("--selector", default="")
     ap.add_argument("--api-url", default="")
     ap.add_argument("--cursor", default="")
     ap.add_argument("--max-pages", type=int, default=1)
     ap.add_argument("--session", default="content-extract")
     ap.add_argument("--profile", default="~/.config/content-probe-profile")
     ap.add_argument("--direct", action="store_true")
-    ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--close", action="store_true")
     args = ap.parse_args()
 
     env = os.environ.copy()
@@ -63,6 +66,7 @@ def main():
             env.pop(k, None)
 
     profile = os.path.expanduser(args.profile)
+    target = normalize_url(args.url)
     template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extract.js")
     if not os.path.exists(template_path):
         print(json.dumps({"error": f"missing extract.js at {template_path}"}))
@@ -74,6 +78,7 @@ def main():
         "apiUrl": args.api_url,
         "cursor": args.cursor,
         "maxPages": args.max_pages,
+        "selector": args.selector,
     }
 
     template = open(template_path, "r", encoding="utf-8").read()
@@ -88,14 +93,14 @@ def main():
         if f"- {args.session}:" not in listed:
             opened = run([
                 "playwright-cli", f"-s={args.session}", "open",
-                "--persistent", f"--profile={profile}", args.url
+                "--persistent", f"--profile={profile}", target
             ], env)
             if opened.returncode != 0:
                 print(json.dumps({"error": "open failed", "stderr": opened.stderr[-500:]}))
                 return 1
         else:
             navigated = run([
-                "playwright-cli", f"-s={args.session}", "goto", args.url
+                "playwright-cli", f"-s={args.session}", "goto", target
             ], env)
             if navigated.returncode != 0:
                 print(json.dumps({"error": "goto failed", "stderr": navigated.stderr[-500:]}))
@@ -116,9 +121,11 @@ def main():
         except json.JSONDecodeError:
             print(raw)
             return 0
+        parsed["requestedUrl"] = args.url
+        parsed["normalizedUrl"] = target
         print(json.dumps(parsed, ensure_ascii=False, indent=2))
 
-        if not args.keep:
+        if args.close:
             run(["playwright-cli", f"-s={args.session}", "close"], env)
         return 0
     finally:
