@@ -1,6 +1,23 @@
 """Shared helpers for content-insight scripts."""
 import re
+import urllib.request
 from urllib.parse import parse_qs, urlparse
+
+
+def resolve_short_url(url, timeout=8):
+    """Follow a short-link redirect (e.g. v.douyin.com) once."""
+    if not url:
+        return url
+    req = urllib.request.Request(
+        url,
+        method="HEAD",
+        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.geturl() or url
+    except Exception:
+        return url
 
 
 def normalize_url(url):

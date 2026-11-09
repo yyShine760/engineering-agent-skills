@@ -258,7 +258,10 @@ async page => {
       for (let i = 0; i < lines.length && out.length < 8; i++) {
         const combined = lines[i].match(/^(\d{2}:\d{2}(?::\d{2})?)\s+(.+)$/);
         if (combined) {
-          out.push({ start: combined[1], title: combined[2].slice(0, 60) });
+          const title = combined[2].trim();
+          if (/^\/\s*\d{2}:\d{2}/.test(title)) continue;
+          if (title.includes('#') || title.length > 40) continue;
+          out.push({ start: combined[1], title: title.slice(0, 60) });
           continue;
         }
         const only = lines[i].match(/^(\d{2}:\d{2}(?::\d{2})?)$/);

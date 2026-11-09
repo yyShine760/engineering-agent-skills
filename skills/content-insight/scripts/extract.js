@@ -370,7 +370,7 @@ async page => {
   }
 
   if (!result.meta.title) result.meta.title = preview.title || '';
-  if (!result.body) result.body = preview.description || '';
+  if (!result.body && args.source !== 'text') result.body = preview.description || '';
   if (!result.meta.author) warnings.push('author not resolved');
 
   return JSON.stringify(result);

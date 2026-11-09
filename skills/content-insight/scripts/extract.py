@@ -20,7 +20,7 @@ import re
 import subprocess
 import sys
 
-from common import normalize_url
+from common import normalize_url, resolve_short_url
 
 
 def run(cmd, env):
@@ -66,7 +66,10 @@ def main():
             env.pop(k, None)
 
     profile = os.path.expanduser(args.profile)
-    target = normalize_url(args.url)
+    target = args.url
+    if any(x in target for x in ("v.douyin.com", "xhslink.com")):
+        target = resolve_short_url(target)
+    target = normalize_url(target)
     template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extract.js")
     if not os.path.exists(template_path):
         print(json.dumps({"error": f"missing extract.js at {template_path}"}))
@@ -96,7 +99,13 @@ def main():
                 "--persistent", f"--profile={profile}", target
             ], env)
             if opened.returncode != 0:
-                print(json.dumps({"error": "open failed", "stderr": opened.stderr[-500:]}))
+                run(["playwright-cli", f"-s={args.session}", "close"], env)
+                opened = run([
+                    "playwright-cli", f"-s={args.session}", "open",
+                    "--persistent", f"--profile={profile}", target
+                ], env)
+            if opened.returncode != 0:
+                print(json.dumps({"error": "open failed after retry", "stderr": opened.stderr[-500:]}))
                 return 1
         else:
             navigated = run([

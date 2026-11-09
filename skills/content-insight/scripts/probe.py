@@ -17,7 +17,7 @@ import re
 import subprocess
 import sys
 
-from common import normalize_url
+from common import normalize_url, resolve_short_url
 
 
 def run(cmd, env):
@@ -59,7 +59,10 @@ def main():
             env.pop(k, None)
 
     profile = os.path.expanduser(args.profile)
-    target = normalize_url(args.url)
+    target = args.url
+    if any(x in target for x in ("v.douyin.com", "xhslink.com")):
+        target = resolve_short_url(target)
+    target = normalize_url(target)
     probe_js = os.path.join(os.path.dirname(os.path.abspath(__file__)), "probe.js")
     if not os.path.exists(probe_js):
         print(json.dumps({"error": f"missing probe.js at {probe_js}"}))
@@ -72,7 +75,14 @@ def main():
             "--persistent", f"--profile={profile}", target
         ], env)
         if opened.returncode != 0:
-            print(json.dumps({"error": "open failed", "stderr": opened.stderr[-500:]}))
+            # profile may be locked by a stale process; close and retry once
+            run(["playwright-cli", f"-s={args.session}", "close"], env)
+            opened = run([
+                "playwright-cli", f"-s={args.session}", "open",
+                "--persistent", f"--profile={profile}", target
+            ], env)
+        if opened.returncode != 0:
+            print(json.dumps({"error": "open failed after retry", "stderr": opened.stderr[-500:]}))
             return 1
     else:
         navigated = run([
