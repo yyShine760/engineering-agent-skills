@@ -1,6 +1,6 @@
-# Engineering Agent Skills
+# Agent Skills
 
-A curated collection of production-grade **Engineering Agent Skills** built on the **Lean Knowledge Architecture (v2.0.2)**. Designed for multi-agent collaboration, project onboarding, workflow governance, and concise task delegation across modern AI coding agents (OpenCode, Codex, Claude Code, Gemini CLI, Cursor, and more).
+A curated collection of production-grade **Agent Skills** for engineering workflows, content retrieval, and everyday tasks. Built on the **Lean Knowledge Architecture (v2.0.2)** and designed for multi-agent collaboration across modern AI coding agents (OpenCode, Codex, Claude Code, Gemini CLI, Cursor, and more).
 
 ---
 
@@ -8,7 +8,7 @@ A curated collection of production-grade **Engineering Agent Skills** built on t
 
 Traditional agent setups often suffer from file proliferation (8~20 fragmented documentation files), causing high cognitive overhead and cross-file synchronization drift. 
 
-**Engineering Agent Skills v2.0.2** shifts from *file-oriented fragmentation* to a **Source-of-Truth-Oriented Lean Architecture**:
+**Agent Skills v2.0.2** shifts from *file-oriented fragmentation* to a **Source-of-Truth-Oriented Lean Architecture**:
 
 ```text
 Project/
@@ -39,12 +39,12 @@ Project/
 
 ## 📦 Skills Catalog
 
-| Skill | Description | Primary Use Case |
-|---|---|---|
-| **`agent-workflow-onboarding`** | Interactively survey an unfamiliar codebase and establish a **Lean Knowledge System** (`AGENTS.md` + `Docs/PROJECT.md`, with built-in Git branching & Conventional Commits baseline rules). | Initializing or migrating repositories to the Lean Agent Architecture. |
-| **`agent-workflow-maintenance`** | **Trigger-driven**, conservative maintenance that maps change triggers directly to the single source of truth via the `AGENTS.md` Knowledge Map. | Keeping project facts and rules aligned after code, build, or architecture changes. |
-| **`write-agent-prompts`** | Draft, compress, review, or split copy-ready, decision-critical execution prompts for AI subagents. | Delegating tasks to subagents with explicit boundaries, acceptance checks, and zero fluff. |
-| **`content-insight`** | Platform-agnostic content probe: classifies video, image-text notes, threads, and articles, then discovers body text, chapters, subtitles, and comments on YouTube, Douyin, Xiaohongshu, Bilibili, Tieba, X, Weibo, Zhihu, and unfamiliar sites by inspecting real page requests instead of hardcoded adapters. | Retrieving content structure and audience reactions from an arbitrary URL. |
+| Category | Skill | Description | Primary Use Case |
+|---|---|---|---|
+| Engineering Workflow | **`agent-workflow-onboarding`** | Interactively survey an unfamiliar codebase and establish a **Lean Knowledge System** (`AGENTS.md` + `Docs/PROJECT.md`, with built-in Git branching & Conventional Commits baseline rules). | Initializing or migrating repositories to the Lean Agent Architecture. |
+| Engineering Workflow | **`agent-workflow-maintenance`** | **Trigger-driven**, conservative maintenance that maps change triggers directly to the single source of truth via the `AGENTS.md` Knowledge Map. | Keeping project facts and rules aligned after code, build, or architecture changes. |
+| Engineering Workflow | **`write-agent-prompts`** | Draft, compress, review, or split copy-ready, decision-critical execution prompts for AI subagents. | Delegating tasks to subagents with explicit boundaries, acceptance checks, and zero fluff. |
+| Content & Research | **`content-insight`** | Platform-agnostic content probe: classifies video, image-text notes, threads, and articles, then discovers body text, chapters, subtitles, and comments on YouTube, Douyin, Xiaohongshu, Bilibili, Tieba, X, Weibo, Zhihu, and unfamiliar sites by inspecting real page requests instead of hardcoded adapters. | Retrieving content structure and audience reactions from an arbitrary URL. |
 
 ---
 
@@ -57,7 +57,7 @@ Skills are distributed via the standard [`skills`](https://github.com/vercel-lab
 Run the interactive installer to choose skills, target agents, and installation scope:
 
 ```bash
-npx skills add yyShine760/engineering-agent-skills
+npx skills add yyShine760/yy-agent-skills
 ```
 
 ### 2. Install Specific Skills
@@ -67,7 +67,7 @@ npx skills add yyShine760/engineering-agent-skills
 Installs the skill to the current project (e.g. `.agents/skills/` or `.claude/skills/`):
 
 ```bash
-npx skills add yyShine760/engineering-agent-skills --skill write-agent-prompts
+npx skills add yyShine760/yy-agent-skills --skill write-agent-prompts
 ```
 
 #### Global Scope
@@ -75,7 +75,7 @@ npx skills add yyShine760/engineering-agent-skills --skill write-agent-prompts
 Installs the skill globally for all projects (e.g. `~/.config/opencode/skills/` or `~/.codex/skills/`):
 
 ```bash
-npx skills add yyShine760/engineering-agent-skills --skill write-agent-prompts --global
+npx skills add yyShine760/yy-agent-skills --skill write-agent-prompts --global
 ```
 
 ### 3. Specify Target Agents
@@ -84,10 +84,10 @@ Install directly to specific agents:
 
 ```bash
 # Install to OpenCode globally
-npx skills add yyShine760/engineering-agent-skills -s write-agent-prompts -a opencode -g
+npx skills add yyShine760/yy-agent-skills -s write-agent-prompts -a opencode -g
 
 # Install to multiple agents at once
-npx skills add yyShine760/engineering-agent-skills \
+npx skills add yyShine760/yy-agent-skills \
   --skill write-agent-prompts \
   --agent codex \
   --agent claude-code \
@@ -99,7 +99,7 @@ npx skills add yyShine760/engineering-agent-skills \
 ### 4. Install All Skills
 
 ```bash
-npx skills add yyShine760/engineering-agent-skills --all --global
+npx skills add yyShine760/yy-agent-skills --all --global
 ```
 
 ### 5. Check & Update
@@ -117,7 +117,7 @@ npx skills update
 ## 📂 Repository Structure
 
 ```text
-engineering-agent-skills/
+yy-agent-skills/
 ├── .gitignore
 ├── LICENSE
 ├── README.md
